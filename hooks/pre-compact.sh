@@ -17,11 +17,10 @@ if [ ! -f "$CONTEXT_FILE" ]; then
     exit 0
 fi
 
+PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
 # Copy command to read context file, then clean up both files
 echo "cat \"$CONTEXT_FILE\" && rm \"$CONTEXT_FILE\" \"$(pwd)/$BREADCRUMB\"" | \
-    if command -v pbcopy >/dev/null 2>&1; then pbcopy; \
-    elif command -v xclip >/dev/null 2>&1; then xclip -selection clipboard; \
-    elif command -v clip.exe >/dev/null 2>&1; then clip.exe; \
-    fi
+    "$PLUGIN_ROOT/scripts/clipboard.sh"
 
 echo "📎 Copied: cat + rm $CONTEXT_FILE" >&2
