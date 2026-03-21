@@ -1,5 +1,4 @@
 ---
-name: shrink
 description: Shrink context safely. Audits loose ends, categorizes items, saves session context.
 argument-hint: "[--doc] [--clear] [--force]"
 allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh:*), Bash(git:*), Read, Write, Edit

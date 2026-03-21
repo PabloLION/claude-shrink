@@ -1,6 +1,6 @@
 # Agent Instructions
 
-Claude Code plugin for safe context shrinking. Read `./skills/shrink/SKILL.md`
+Claude Code plugin for safe context shrinking. Read `./skills/shrink-nightly/SKILL.md`
 for skill logic and `.git-globally-ignored/HANDOFF.md` for migration context.
 
 This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get started.
