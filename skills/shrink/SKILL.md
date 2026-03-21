@@ -270,7 +270,7 @@ Based on decision in step 6:
 - Save instruction to `<auto-memory-dir>/compact-instruction.txt`
 - Copy `/compact <instruction>` to clipboard (no trailing newline)
 
-To copy to clipboard, run `scripts/copy-compact-cmd.sh <auto-memory-dir>/compact-instruction.txt` from the skill directory.
+To copy to clipboard, run `${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh <auto-memory-dir>/compact-instruction.txt`.
 
 ### 9. Instruct User
 
