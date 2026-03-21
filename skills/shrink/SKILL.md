@@ -1,7 +1,7 @@
 ---
 name: shrink
 description: Shrink context safely. Audits loose ends, categorizes items, saves session context.
-argument-hint: "[--doc] [--clear]"
+argument-hint: "[--doc] [--clear] [--force]"
 allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh:*), Bash(git:*), Read, Write, Edit
 ---
 
@@ -13,13 +13,14 @@ You are shrinking the context safely.
 |-----|-------------|
 | `--doc` | Include undocumented locked ends in audit. Prompts user to document finished work that lacks notes. |
 | `--clear` | Use `/clear` instead of `/compact`. Writes lightweight topic hint only. |
+| `--force` | Force `/clear` even if C items exist. Implies `--clear`. |
 
 Without `--doc`: Only audits loose ends (unfinished work).
 With `--doc`: Also audits undocumented locked ends (finished work without documentation).
 
 Default behavior is `/compact`. Pass `--clear` for a fresh start with minimal
 context bridging. If any C items exist, `/compact` is used regardless of
-`--clear`.
+`--clear` (unless `--force` overrides).
 
 ## Process
 
@@ -175,6 +176,7 @@ AND no C items exist.
 
 | Condition | Action |
 |-----------|--------|
+| `--force` flag | `/clear` (regardless of C items) |
 | Any C items | `/compact` (regardless of `--clear` flag) |
 | `--clear` flag, no C items | `/clear` |
 | No flag, no C items | `/compact` |
