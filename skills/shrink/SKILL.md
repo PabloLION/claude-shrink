@@ -114,7 +114,34 @@ For items marked Yes:
 2. Add to document index
 3. Commit documentation changes
 
-### 4. Categorization Phase
+### 4. Devlog Phase (if DEVLOG_DIR is set)
+
+Check if the `DEVLOG_DIR` environment variable is set and non-empty. If so,
+offer to write a devlog entry for the current session's work topic.
+
+Read `DEVLOG_DIR` from `settings.local.json` via consumer convention:
+`jq -r '.env.DEVLOG_DIR // ""' .claude/settings.local.json`
+
+If `DEVLOG_DIR` is empty or unset, skip this phase silently.
+
+```text
+Write devlog entry for this session?
+Topic: <inferred topic from conversation>
+ ❯ Yes — write/append to devlog
+   No — skip
+```
+
+If Yes:
+1. Infer the topic name from the session's primary work
+2. Slugify the topic name for the filename (e.g., `plugin-migration.md`)
+3. If a file for this topic already exists in `DEVLOG_DIR`, append a new
+   dated section. If not, create the file
+4. Content: date, what was done, decisions made, open questions
+
+Devlog entries are cumulative per topic, not per session. Multiple sessions
+on the same topic append to the same file.
+
+### 5. Categorization Phase
 
 For loose ends, the audit table already shows **Rec** (recommended) and **Alt**
 (alternative) actions. User types a **letter sequence** to confirm or override
@@ -133,7 +160,7 @@ with no input to accept all recommendations.
 Example for 3 loose ends with Rec=B,C,D: enter accepts all, `BCD` confirms
 explicitly, `BCB` overrides item 3 from D→B.
 
-### 5. Execute Decisions
+### 6. Execute Decisions
 
 Process user's choices from all phases:
 
@@ -169,7 +196,7 @@ Dropped:
   • Old session notes
 ```
 
-### 6. Decide: Clear vs Compact
+### 7. Decide: Clear vs Compact
 
 Default is always `/compact`. Only use `/clear` when `--clear` flag was passed
 AND no C items exist.
@@ -184,7 +211,7 @@ AND no C items exist.
 No user confirmation needed — the decision follows deterministically from the
 flag and C item count.
 
-### 7. Write Session Context
+### 8. Write Session Context
 
 Write context file to pass information to next session.
 
@@ -261,9 +288,9 @@ Generated: <timestamp>
 No Next Steps, Key Context, Background Agents, or User Corrections. Topics
 are listed with `[locked]` or `[loose]` status and a brief summary.
 
-### 8. Generate Command and Copy to Clipboard
+### 9. Generate Command and Copy to Clipboard
 
-Based on decision in step 6:
+Based on decision in step 7:
 
 **If clearing:**
 - Copy `/clear` to clipboard (no trailing newline)
@@ -275,7 +302,7 @@ Based on decision in step 6:
 
 To copy to clipboard, run `${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh <auto-memory-dir>/compact-instruction.txt`.
 
-### 9. Instruct User
+### 10. Instruct User
 
 Tell user verbally what happens next:
 
