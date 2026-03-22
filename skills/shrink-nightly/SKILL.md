@@ -115,13 +115,10 @@ For items marked Yes:
 
 ### 4. Devlog Phase (if DEVLOG_DIR is set)
 
-Check if the `DEVLOG_DIR` environment variable is set and non-empty. If so,
-offer to write a devlog entry for the current session's work topic.
+DEVLOG_DIR: !`jq -r '.env.DEVLOG_DIR // "not set"' .claude/settings.local.json 2>/dev/null`
 
-Read `DEVLOG_DIR` from `settings.local.json` via consumer convention:
-`jq -r '.env.DEVLOG_DIR // empty' .claude/settings.local.json`
-
-If `DEVLOG_DIR` is empty or unset, skip this phase silently.
+If DEVLOG_DIR above is not set, skip this phase silently. Otherwise, offer to
+write a devlog entry for the current session's work topic.
 
 ```text
 Write devlog entry for this session?
