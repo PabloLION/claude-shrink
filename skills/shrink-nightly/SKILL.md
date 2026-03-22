@@ -1,7 +1,14 @@
 ---
 description: Shrink context safely. Audits loose ends, categorizes items, saves session context.
 argument-hint: "[--doc] [--clear] [--force]"
-allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh:*), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/get-devlog-dir.sh), Bash(git:*), Read, Write, Edit
+allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/get-devlog-dir.sh)
+  - Bash(git:*)
+  - Read
+  - Write(${CLAUDE_CODE_TMPDIR}/session-context.md)
+  - Write(${CLAUDE_CODE_TMPDIR}/compact-instruction.txt)
+  - Edit
 ---
 
 You are shrinking the context safely.
