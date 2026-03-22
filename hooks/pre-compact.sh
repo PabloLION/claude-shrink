@@ -3,7 +3,7 @@
 # After compaction, user pastes the context content directly.
 # Files are cleaned up here — no dependency on user action.
 
-TMPDIR="${CLAUDE_CODE_TMPDIR:-./.claude/tmp}"
+TMPDIR="${CLAUDE_CODE_TMPDIR:-/tmp}"
 CONTEXT_FILE="$TMPDIR/session-context.md"
 
 if [ ! -f "$CONTEXT_FILE" ]; then

@@ -217,7 +217,7 @@ Write context file to pass information to next session.
 **Path:** `$CLAUDE_CODE_TMPDIR/session-context.md`
 
 Where `$CLAUDE_CODE_TMPDIR` is the Claude Code temporary directory (default:
-`./.claude/tmp`). Both the skill and the PreCompact hook use this same path.
+`/tmp`). Both the skill and the PreCompact hook use this same path.
 
 #### Compact path (default)
 
