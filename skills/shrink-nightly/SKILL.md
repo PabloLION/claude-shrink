@@ -1,7 +1,7 @@
 ---
 description: Shrink context safely. Audits loose ends, categorizes items, saves session context.
 argument-hint: "[--doc] [--clear] [--force]"
-allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh:*), Bash(git:*), Read, Write, Edit
+allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh:*), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/get-devlog-dir.sh), Bash(git:*), Read, Write, Edit
 ---
 
 You are shrinking the context safely.
@@ -115,7 +115,7 @@ For items marked Yes:
 
 ### 4. Devlog Phase (if DEVLOG_DIR is set)
 
-DEVLOG_DIR: !`jq -r '.env.DEVLOG_DIR // "not set"' .claude/settings.local.json 2>/dev/null`
+DEVLOG_DIR: !`${CLAUDE_PLUGIN_ROOT}/scripts/get-devlog-dir.sh`
 
 If DEVLOG_DIR above is not set, skip this phase silently. Otherwise, offer to
 write a devlog entry for the current session's work topic.
