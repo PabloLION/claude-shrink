@@ -2,8 +2,10 @@
 description: Shrink context safely. Audits loose ends, categorizes items, saves session context.
 argument-hint: "[--doc] [--clear] [--force]"
 allowed-tools:
-  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh:*)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/finalize.sh:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/get-devlog-dir.sh)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/get-tmpdir.sh)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/get-timestamp.sh)
   - Bash(git:*)
   - Read
   - Write(${CLAUDE_CODE_TMPDIR}/session-context.md)
@@ -218,107 +220,69 @@ flag and C item count.
 
 Write context file to pass information to next session.
 
-**Path:** `$CLAUDE_CODE_TMPDIR/session-context.md`
+TMPDIR: !`${CLAUDE_PLUGIN_ROOT}/scripts/get-tmpdir.sh`
+TIMESTAMP: !`${CLAUDE_PLUGIN_ROOT}/scripts/get-timestamp.sh`
 
-Where `$CLAUDE_CODE_TMPDIR` is the Claude Code temporary directory (default:
-`/tmp`). Both the skill and the PreCompact hook use this same path.
+**Path:** `TMPDIR/session-context.md` (using TMPDIR value above).
 
 #### Compact path (default)
 
-Full context — focus on what to carry forward, not what was done:
+Write full context — focus on what to carry forward, not what was done:
 
 ```markdown
 <!-- EPHEMERAL: Single-use file. Delete after reading in next session. -->
 # Session Context
 
-Generated: <timestamp>
-**This file:** <full absolute path to this file>
+Generated: TIMESTAMP
+**This file:** TMPDIR/session-context.md
 
 ## Next Steps
 
-For each C item:
-- What to do next
-- Decisions still pending
-- Blockers or dependencies
+- C item: what to do next, pending decisions, blockers
 
 ## Key Context
 
-Minimal background needed to understand next steps. Not a history — if it's
-committed or tracked in beads, don't repeat it here.
+Minimal background for next steps. Not a history.
 
 ## Background Agents
-
-Active or recently completed background agents. Include agent ID, description,
-and output file path so the next context can retrieve results via TaskOutput
-or resume via the Task tool's resume parameter.
 
 - Agent ID: <agentId> — <description> — <output_file or "completed">
 
 ## User Corrections
 
-Preferences or corrections the user expressed this session. These get lost in
-automatic summaries and are worth preserving explicitly.
+Preferences or corrections expressed this session.
 ```
 
 #### Clear path (`--clear`)
 
-Lightweight topic hint — just enough for orientation in a fresh session:
+Write lightweight topic hint only:
 
 ```markdown
 <!-- EPHEMERAL: Single-use file. Delete after reading in next session. -->
 # Session Context (clear)
 
-Generated: <timestamp>
-**This file:** <full absolute path to this file>
+Generated: TIMESTAMP
+**This file:** TMPDIR/session-context.md
 
 ## Topics
 
-- [locked] Topic name — one-line summary of outcome
-- [locked] Another topic — committed as abc1234
-- [loose] Unfinished topic — tracked in mf-xxx
+- [locked] Topic name — one-line summary
+- [loose] Unfinished topic — tracked in cs-xxx
 ```
 
-No Next Steps, Key Context, Background Agents, or User Corrections. Topics
-are listed with `[locked]` or `[loose]` status and a brief summary.
+### 9. Finalize
 
-### 9. Generate Command and Copy to Clipboard
-
-Based on decision in step 7:
-
-**If clearing:**
-- Copy `/clear` to clipboard (no trailing newline)
-
-**If compacting:**
-- Generate instruction: `Focus on <C items summary>`
-- Save instruction to `$CLAUDE_CODE_TMPDIR/compact-instruction.txt`
-- Copy `/compact <instruction>` to clipboard (no trailing newline)
-
-To copy to clipboard, run `${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh $CLAUDE_CODE_TMPDIR/compact-instruction.txt`.
-
-### 10. Instruct User
-
-Tell user verbally what happens next:
-
-**If clearing:**
+**If compacting:** Write instruction to `TMPDIR/compact-instruction.txt`:
 
 ```text
-📎 Copied: /clear
-
-After clear, SessionStart hook reads session-context.md (topic list only),
-then deletes it.
+Focus on <C items summary>
 ```
 
-**If compacting:**
+Then run `${CLAUDE_PLUGIN_ROOT}/scripts/finalize.sh` (no arguments — it reads
+the instruction file from TMPDIR internally).
 
-```text
-📎 Copied: /compact <instruction>
+**If clearing:** Run `${CLAUDE_PLUGIN_ROOT}/scripts/finalize.sh --clear`.
 
-PreCompact hook will copy a read+cleanup command to clipboard.
-After compaction, paste to read context — both files are auto-deleted.
-
-First prompt in new session: focus on C items (already in compact summary).
-```
-
-**Cleanup note:** Session context files are single-use. The PreCompact hook
-cleans up automatically. For `/clear`, the new session should delete
-`$CLAUDE_CODE_TMPDIR/session-context.md` after reading.
+Echo the script output to the user. Cleanup is automatic — PreCompact hook
+deletes temp files, `/clear` sessions should delete session-context.md after
+reading.
