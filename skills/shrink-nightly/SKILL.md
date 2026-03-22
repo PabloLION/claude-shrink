@@ -119,7 +119,7 @@ Check if the `DEVLOG_DIR` environment variable is set and non-empty. If so,
 offer to write a devlog entry for the current session's work topic.
 
 Read `DEVLOG_DIR` from `settings.local.json` via consumer convention:
-`jq -r '.env.DEVLOG_DIR // ""' .claude/settings.local.json`
+`jq -r '.env.DEVLOG_DIR // empty' .claude/settings.local.json`
 
 If `DEVLOG_DIR` is empty or unset, skip this phase silently.
 
