@@ -3,16 +3,10 @@
 # After compaction, user pastes the context content directly.
 # Files are cleaned up here — no dependency on user action.
 
-BREADCRUMB=".claude/tmp/context-path.txt"
-
-if [ ! -f "$BREADCRUMB" ]; then
-    exit 0
-fi
-
-CONTEXT_FILE=$(cat "$BREADCRUMB")
+TMPDIR="${CLAUDE_CODE_TMPDIR:-./.claude/tmp}"
+CONTEXT_FILE="$TMPDIR/session-context.md"
 
 if [ ! -f "$CONTEXT_FILE" ]; then
-    rm -f "$BREADCRUMB"
     exit 0
 fi
 
@@ -21,7 +15,7 @@ PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # Copy context content to clipboard (user pastes text, not a command)
 cat "$CONTEXT_FILE" | "$PLUGIN_ROOT/scripts/clipboard.sh"
 
-# Clean up directly
-rm -f "$CONTEXT_FILE" "$BREADCRUMB"
+# Clean up
+rm -f "$CONTEXT_FILE" "$TMPDIR/compact-instruction.txt"
 
 echo "📎 Session context copied to clipboard (files cleaned up)" >&2

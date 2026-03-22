@@ -214,20 +214,10 @@ flag and C item count.
 
 Write context file to pass information to next session.
 
-**Path:** `<auto-memory-dir>/session-context.md`
+**Path:** `$CLAUDE_CODE_TMPDIR/session-context.md`
 
-Where `<auto-memory-dir>` is the persistent auto memory directory from the system
-prompt (e.g., `~/.claude/projects/<encoded-path>/memory/`). This path is stable,
-not git-tracked, and persists across sessions.
-
-**Breadcrumb:** After writing the context file, write its absolute path to
-`.claude/tmp/context-path.txt` (project-relative). This lets the PreCompact hook
-find the file without knowing the encoded auto-memory path.
-
-```sh
-mkdir -p .claude/tmp
-echo "<absolute-path-to-session-context.md>" > .claude/tmp/context-path.txt
-```
+Where `$CLAUDE_CODE_TMPDIR` is the Claude Code temporary directory (default:
+`./.claude/tmp`). Both the skill and the PreCompact hook use this same path.
 
 #### Compact path (default)
 
@@ -296,10 +286,10 @@ Based on decision in step 7:
 
 **If compacting:**
 - Generate instruction: `Focus on <C items summary>`
-- Save instruction to `<auto-memory-dir>/compact-instruction.txt`
+- Save instruction to `$CLAUDE_CODE_TMPDIR/compact-instruction.txt`
 - Copy `/compact <instruction>` to clipboard (no trailing newline)
 
-To copy to clipboard, run `${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh <auto-memory-dir>/compact-instruction.txt`.
+To copy to clipboard, run `${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh $CLAUDE_CODE_TMPDIR/compact-instruction.txt`.
 
 ### 10. Instruct User
 
@@ -311,7 +301,7 @@ Tell user verbally what happens next:
 📎 Copied: /clear
 
 After clear, SessionStart hook reads session-context.md (topic list only),
-then deletes it and .claude/tmp/context-path.txt.
+then deletes it.
 ```
 
 **If compacting:**
@@ -326,5 +316,5 @@ First prompt in new session: focus on C items (already in compact summary).
 ```
 
 **Cleanup note:** Session context files are single-use. The PreCompact hook
-includes `rm` in the clipboard command. For `/clear`, the new session should
-delete `session-context.md` and `.claude/tmp/context-path.txt` after reading.
+cleans up automatically. For `/clear`, the new session should delete
+`$CLAUDE_CODE_TMPDIR/session-context.md` after reading.
