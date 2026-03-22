@@ -18,4 +18,5 @@ cat "$CONTEXT_FILE" | "$PLUGIN_ROOT/scripts/clipboard.sh"
 # Clean up
 rm -f "$CONTEXT_FILE" "$TMPDIR/compact-instruction.txt"
 
-echo "📎 Session context copied to clipboard (files cleaned up)" >&2
+# Output JSON for Claude Code
+printf '{"systemMessage":"Session context copied to clipboard. Paste after compaction to restore context."}\n'
