@@ -1,7 +1,7 @@
 ---
 description: Shrink context safely. Audits loose ends, categorizes items, saves session context.
 argument-hint: "[--doc] [--clear] [--force]"
-allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh:*), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/get-devlog-dir.sh), Bash(git:*), Read, Write, Edit
+allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/copy-compact-cmd.sh:*), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/get-devlog-dir.sh), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/write-session-context.sh), Bash(git:*), Read, Write, Edit
 ---
 
 You are shrinking the context safely.
@@ -209,7 +209,14 @@ flag and C item count.
 
 ### 8. Write Session Context
 
-Write context file to pass information to next session.
+Write context file to pass information to next session. Pipe the content to
+the write helper to avoid sensitive path prompts:
+
+```sh
+cat <<'CONTEXT' | ${CLAUDE_PLUGIN_ROOT}/scripts/write-session-context.sh
+<session context content here>
+CONTEXT
+```
 
 **Path:** `$CLAUDE_CODE_TMPDIR/session-context.md`
 
