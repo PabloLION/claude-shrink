@@ -33,3 +33,11 @@ follow the documented API correctly — this is a Claude Code platform limitatio
 DCI scripts handle the fallback correctly via shell default syntax
 (`${CLAUDE_CODE_TMPDIR:-/tmp}`), but allowed-tools frontmatter has no equivalent
 mechanism.
+
+Hooks cannot trigger slash commands. Hooks can react to events (inject context,
+block actions) but cannot invoke `/compact`, `/clear`, or other commands. The
+use case of auto-triggering shrink and compact on branch switch is not possible.
+
+Prompt suggestions are not programmable. Claude Code's Tab-to-accept suggestions
+are auto-generated with no configuration API. Custom suggestions (e.g., suggest
+reading session context after shrink) cannot be implemented.
