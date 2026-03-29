@@ -1,0 +1,15 @@
+{
+  "name": "claude-shrink",
+  "description": "Local marketplace for claude-shrink plugin",
+  "owner": {
+    "name": "PabloLION"
+  },
+  "plugins": [
+    {
+      "name": "claude-shrink",
+      "source": "./",
+      "description": "Safe context shrinking for Claude Code",
+      "version": "0.1.0"
+    }
+  ]
+}
