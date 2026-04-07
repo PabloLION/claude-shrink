@@ -33,6 +33,26 @@ context bridging. If any C items exist, `/compact` is used regardless of
 
 ## Process
 
+### 0. Preserve
+
+Before auditing, capture knowledge that would be lost in compaction.
+
+**Extract recurring feedback**
+
+Scan the conversation for patterns the user repeated multiple times or
+corrected more than once. Save each as a feedback memory or user-scope rule.
+These are the easiest to lose in compaction — always do this explicitly.
+
+**Promote decisions**
+
+Check if any locked decisions from this session should be promoted to a
+persistent tier:
+- Project rules updates (`.claude/rules/`)
+- Memory updates (`~/.claude/projects/.../memory/`)
+- ADR or doc updates (project docs)
+
+Skip if no novel decisions were made this session.
+
 ### 1. Audit
 
 Scan the current context and produce all items across these buckets:
@@ -153,9 +173,26 @@ Devlog entries are cumulative per topic, not per session.
 - **C** → Collect as focus for next session
 - **D** → Acknowledge and discard
 
+**Loose ends file (memory):**
+
+If any C items or unfinished work exist, create `loose-ends-YYYYMMDD.md` in the
+user's memory directory. This replaces the previous loose ends file (delete it
+first). Include:
+- Unfinished design items
+- Open questions
+- Gaps identified but not addressed
+- Items deferred to specific sprints
+
+This file persists across sessions (unlike session-context.md which is
+ephemeral). It acts as a safety net if the session context is lost.
+
 Report what was done:
 
 ```text
+Preserved:
+  • Feedback: "no rm -rf" → saved to memory
+  • Promoted: session isolation design → project rules
+
 Housekeeping:
   • Uncommitted changes → committed (chore)
   • ~/path/scratch.md → deleted
@@ -174,6 +211,9 @@ Created:
 
 Focus (carrying forward):
   • Pre-compact redesign draft
+
+Loose ends file:
+  • loose-ends-20260407.md → written to memory
 
 Dropped:
   • Old session notes
