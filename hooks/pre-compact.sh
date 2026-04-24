@@ -2,30 +2,43 @@
 # PreCompact hook: copies session context to clipboard and cleans up.
 # After compaction, user pastes the context content directly.
 # Files are cleaned up here — no dependency on user action.
+#
+# Discovery order:
+#   1. session_id from JSON stdin (per-session, no collision)
+#   2. Breadcrumb file (legacy fallback, per-project-directory)
 
-BREADCRUMB=".claude/tmp/context-path.txt"
+PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+BASE="${CLAUDE_CODE_TMPDIR:-/tmp}"
 
-if [ ! -f "$BREADCRUMB" ]; then
+# Read session_id from JSON stdin
+INPUT="$(cat)"
+SESSION_ID="$(echo "$INPUT" | jq -r '.session_id // empty')"
+
+# Try session_id path first
+if [ -n "$SESSION_ID" ] && [ -f "$BASE/shrink-$SESSION_ID/session-context.md" ]; then
+  CONTEXT_FILE="$BASE/shrink-$SESSION_ID/session-context.md"
+else
+  # Fallback: breadcrumb file
+  BREADCRUMB=".claude/tmp/context-path.txt"
+  if [ ! -f "$BREADCRUMB" ]; then
     exit 0
-fi
+  fi
+  CONTEXT_FILE="$(cat "$BREADCRUMB")"
+  rm "$BREADCRUMB"
 
-CONTEXT_FILE="$(cat "$BREADCRUMB")"
-
-if [ ! -f "$CONTEXT_FILE" ]; then
-    rm "$BREADCRUMB"
+  if [ ! -f "$CONTEXT_FILE" ]; then
     exit 0
+  fi
 fi
 
 SESSION_DIR="$(dirname "$CONTEXT_FILE")"
-PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 # Copy context content to clipboard (user pastes text, not a command)
 cat "$CONTEXT_FILE" | "$PLUGIN_ROOT/scripts/clipboard.sh"
 
-# Clean up session files and breadcrumb
-rm "$CONTEXT_FILE" "$SESSION_DIR/compact-instruction.txt"
+# Clean up session files
+rm "$CONTEXT_FILE" "$SESSION_DIR/compact-instruction.txt" 2>/dev/null
 rmdir "$SESSION_DIR" 2>/dev/null
-rm "$BREADCRUMB"
 
 # Output JSON for Claude Code
 printf '{"systemMessage":"Session context copied to clipboard. Paste after compaction to restore context."}\n'

@@ -42,12 +42,8 @@ Prompt suggestions are not programmable. Claude Code's Tab-to-accept suggestions
 are auto-generated with no configuration API. Custom suggestions (e.g., suggest
 reading session context after shrink) cannot be implemented.
 
-Concurrent sessions in the same project directory are not isolated. The
-PreCompact hook discovers session files through a breadcrumb file
-(`.claude/tmp/context-path.txt`) — a fixed path per project directory, not per
-session. If multiple sessions run `/shrink` in the same folder, each overwrites
-the previous breadcrumb. Only the last session's context is copied correctly;
-earlier sessions get the wrong file or an orphaned temp directory. The temp
-directories themselves are isolated (`/tmp/shrink-XXXXXX/`), but the pointer is
-shared. A proper fix requires using a per-session identifier (e.g.,
-`CLAUDE_CODE_TMPDIR`) in the hook instead of a shared breadcrumb file.
+Concurrent sessions require the SessionStart hook to export `SESSION_ID`. If
+the hook fails or `session_id` is missing from the JSON input, the plugin falls
+back to `mktemp` random suffixes — which are isolated but not discoverable by
+the PreCompact hook without a breadcrumb file. In practice, this fallback only
+applies if Claude Code stops providing `session_id` in hook input.
