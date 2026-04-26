@@ -4,7 +4,7 @@
 # Hooks receive session_id in JSON stdin; skill scripts get it via
 # the exported SESSION_ID env var.
 
-SESSION_ID="$(cat | jq -r '.session_id')"
+SESSION_ID="$(jq -r '.session_id // empty')"
 
 if [ -n "$SESSION_ID" ] && [ -n "$CLAUDE_ENV_FILE" ]; then
   echo "export SESSION_ID=$SESSION_ID" >> "$CLAUDE_ENV_FILE"
