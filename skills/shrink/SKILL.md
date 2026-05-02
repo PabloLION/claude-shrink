@@ -1,6 +1,6 @@
 ---
 description: Shrink context safely. Audits loose ends, categorizes items, saves session context.
-argument-hint: "[--doc] [--clear] [--force]"
+argument-hint: "[--doc] [--clear] [--force] [--log]"
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/finalize.sh:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/get-devlog-dir.sh)
@@ -23,6 +23,7 @@ You are shrinking the context safely.
 | `--doc` | Include undocumented locked ends in audit. Prompts user to document finished work that lacks notes. |
 | `--clear` | Use `/clear` instead of `/compact`. Writes lightweight topic hint only. |
 | `--force` | Force `/clear` even if C items exist. Implies `--clear`. |
+| `--log` | Force devlog write. Locks the devlog row's Rec to `Y` regardless of inference. Requires DEVLOG_DIR. |
 
 Without `--doc`: Only audits loose ends (unfinished work).
 With `--doc`: Also audits undocumented locked ends (finished work without documentation).
@@ -72,7 +73,9 @@ Scan the current context and produce all items across these buckets:
 DEVLOG_DIR: !`${CLAUDE_PLUGIN_ROOT}/scripts/get-devlog-dir.sh`
 
 If DEVLOG_DIR above is set, include a devlog row. Infer the topic from the
-session's primary work.
+session's primary work. Rec is `Y` or `N` based on whether the session merits
+a record. With `--log`, Rec is locked to `Y` regardless of inference (reason
+column should note `--log`).
 
 **Loose ends** — substantive unfinished work:
 - Unfinished discussion items

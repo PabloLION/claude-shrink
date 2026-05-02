@@ -22,6 +22,7 @@ Flags for `shrink`:
 | `--doc` | Include undocumented locked ends in audit |
 | `--clear` | Use `/clear` instead of `/compact` |
 | `--force` | Force `/clear` even if C items exist |
+| `--log` | Force devlog write (requires DEVLOG_DIR) |
 
 ## Installation
 
