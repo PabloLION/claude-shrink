@@ -1,6 +1,6 @@
 {
   "name": "claude-shrink",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Safe context shrinking for Claude Code",
   "author": {
     "name": "PabloLION"
