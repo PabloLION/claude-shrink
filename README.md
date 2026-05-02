@@ -7,7 +7,15 @@ items, saves session context, and prepares the compact/clear command.
 
 ```sh
 /claude-shrink:shrink [--doc] [--clear] [--force]
+/claude-shrink:show-session-id
 ```
+
+| Skill | Description |
+|-------|-------------|
+| `shrink` | Audit loose ends and prepare a compact/clear command |
+| `show-session-id` | Report the current session-id from three sources for debugging |
+
+Flags for `shrink`:
 
 | Flag | Description |
 |------|-------------|
@@ -42,8 +50,16 @@ Prompt suggestions are not programmable. Claude Code's Tab-to-accept suggestions
 are auto-generated with no configuration API. Custom suggestions (e.g., suggest
 reading session context after shrink) cannot be implemented.
 
-Concurrent sessions require the SessionStart hook to export `SESSION_ID`. If
-the hook fails or `session_id` is missing from the JSON input, the plugin falls
-back to `mktemp` random suffixes — which are isolated but not discoverable by
-the PreCompact hook without a breadcrumb file. In practice, this fallback only
-applies if Claude Code stops providing `session_id` in hook input.
+Concurrent same-repo sessions are supported via PID-keyed session-id
+distribution. The SessionStart hook writes
+`~/.claude/tmp/session-by-pid/<claude-pid>` with the current session-id on every
+event source (startup, compact, clear, resume). Skill scripts walk the PPID
+chain to find the file written by their parent Claude process; the PID is
+globally unique so concurrent sessions cannot collide. Resolution order is env
+`$SESSION_ID` → PID file → `mktemp` suffix. The last resort suffix is
+isolated but not discoverable by the PreCompact hook without a breadcrumb file.
+
+Claude Code only sources `$CLAUDE_ENV_FILE` on `SessionStart:startup`, so the
+env var stays correct across `/compact` (the session-id does not change) but
+goes stale after `/clear` and `--resume`. The PID file fallback covers those
+cases. Run `/claude-shrink:show-session-id` to inspect all three sources.
