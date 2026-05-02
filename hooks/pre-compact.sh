@@ -36,9 +36,11 @@ SESSION_DIR="$(dirname "$CONTEXT_FILE")"
 # Copy context content to clipboard (user pastes text, not a command)
 cat "$CONTEXT_FILE" | "$PLUGIN_ROOT/scripts/clipboard.sh"
 
-# Clean up session files
-rm "$CONTEXT_FILE" "$SESSION_DIR/compact-instruction.txt" 2>/dev/null
-rmdir "$SESSION_DIR" 2>/dev/null
-
-# Output JSON for Claude Code
-printf '{"systemMessage":"Session context copied to clipboard. Paste after compaction to restore context."}\n'
+# Clean up session files unless --keep marker exists
+if [ -f "$SESSION_DIR/.keep" ]; then
+  printf '{"systemMessage":"Session context copied to clipboard. --keep: temp files preserved at %s/."}\n' "$SESSION_DIR"
+else
+  rm "$CONTEXT_FILE" "$SESSION_DIR/compact-instruction.txt" 2>/dev/null
+  rmdir "$SESSION_DIR" 2>/dev/null
+  printf '{"systemMessage":"Session context copied to clipboard. Paste after compaction to restore context."}\n'
+fi

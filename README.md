@@ -23,6 +23,7 @@ Flags for `shrink`:
 | `--clear` | Use `/clear` instead of `/compact` |
 | `--force` | Force `/clear` even if C items exist |
 | `--log` | Force devlog write (requires DEVLOG_DIR) |
+| `--keep` | Preserve session-context.md after compact/clear (debugging) |
 
 ## Installation
 
