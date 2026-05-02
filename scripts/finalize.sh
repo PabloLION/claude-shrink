@@ -15,8 +15,10 @@ After clear, SessionStart hook reads session-context.md (topic list only),
 then deletes it.
 MSG
 else
-    # Find session dir via SESSION_ID, fall back to breadcrumb
     BASE="${CLAUDE_CODE_TMPDIR:-/tmp}"
+    if [ -z "${SESSION_ID:-}" ]; then
+        SESSION_ID="$("$SCRIPT_DIR/find-session-id.sh")"
+    fi
     if [ -n "${SESSION_ID:-}" ]; then
         SESSION_DIR="$BASE/shrink-$SESSION_ID"
     else
