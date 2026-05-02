@@ -1,6 +1,6 @@
 ---
 description: Shrink context safely. Audits loose ends, categorizes items, saves session context.
-argument-hint: "[--doc] [--clear] [--force] [--log]"
+argument-hint: "[--doc] [--clear] [--force] [--log] [--keep]"
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/finalize.sh:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/get-devlog-dir.sh)
@@ -24,6 +24,7 @@ You are shrinking the context safely.
 | `--clear` | Use `/clear` instead of `/compact`. Writes lightweight topic hint only. |
 | `--force` | Force `/clear` even if C items exist. Implies `--clear`. |
 | `--log` | Force devlog write. Locks the devlog row's Rec to `Y` regardless of inference. Requires DEVLOG_DIR. |
+| `--keep` | Preserve session-context.md and breadcrumbs after compact/clear. Useful for debugging. Files stay at `TMPDIR/shrink-<id>/` until manually deleted. |
 
 Without `--doc`: Only audits loose ends (unfinished work).
 With `--doc`: Also audits undocumented locked ends (finished work without documentation).
@@ -246,6 +247,14 @@ TIMESTAMP: !`${CLAUDE_PLUGIN_ROOT}/scripts/get-timestamp.sh`
 
 **Path:** `TMPDIR/session-context.md` (using TMPDIR value above).
 
+With `--keep`, replace the `EPHEMERAL` line in the templates below with:
+
+```text
+<!-- PRESERVED: kept by --keep flag — do not delete. -->
+```
+
+This signals to the next session that the file should not be auto-deleted.
+
 #### Compact path (default)
 
 Write full context — focus on what to carry forward, not what was done:
@@ -304,6 +313,11 @@ the instruction file from TMPDIR internally).
 
 **If clearing:** Run `${CLAUDE_PLUGIN_ROOT}/scripts/finalize.sh --clear`.
 
-Echo the script output to the user. Cleanup is automatic — PreCompact hook
-deletes temp files, `/clear` sessions should delete session-context.md after
-reading.
+**With `--keep`:** Append `--keep` to the finalize call (`finalize.sh --keep`
+or `finalize.sh --clear --keep`). The script writes a `.keep` marker that tells
+the PreCompact hook to skip cleanup. The `PRESERVED` header in
+session-context.md (see step 5) signals the same to the next session.
+
+Echo the script output to the user. Cleanup is automatic unless `--keep` is
+set — PreCompact hook deletes temp files, `/clear` sessions should delete
+session-context.md after reading.
