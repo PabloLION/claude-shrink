@@ -7,7 +7,15 @@ items, saves session context, and prepares the compact/clear command.
 
 ```sh
 /claude-shrink:shrink [--doc] [--clear] [--force]
+/claude-shrink:show-session-id
 ```
+
+| Skill | Description |
+|-------|-------------|
+| `shrink` | Audit loose ends and prepare a compact/clear command |
+| `show-session-id` | Report the current session-id from three sources for debugging |
+
+Flags for `shrink`:
 
 | Flag | Description |
 |------|-------------|
@@ -42,12 +50,16 @@ Prompt suggestions are not programmable. Claude Code's Tab-to-accept suggestions
 are auto-generated with no configuration API. Custom suggestions (e.g., suggest
 reading session context after shrink) cannot be implemented.
 
-Concurrent sessions in the same project directory are not isolated. The
-PreCompact hook discovers session files through a breadcrumb file
-(`.claude/tmp/context-path.txt`) — a fixed path per project directory, not per
-session. If multiple sessions run `/shrink` in the same folder, each overwrites
-the previous breadcrumb. Only the last session's context is copied correctly;
-earlier sessions get the wrong file or an orphaned temp directory. The temp
-directories themselves are isolated (`/tmp/shrink-XXXXXX/`), but the pointer is
-shared. A proper fix requires using a per-session identifier (e.g.,
-`CLAUDE_CODE_TMPDIR`) in the hook instead of a shared breadcrumb file.
+Concurrent same-repo sessions are supported via PID-keyed session-id
+distribution. The SessionStart hook writes
+`~/.claude/tmp/session-by-pid/<claude-pid>` with the current session-id on every
+event source (startup, compact, clear, resume). Skill scripts walk the PPID
+chain to find the file written by their parent Claude process; the PID is
+globally unique so concurrent sessions cannot collide. Resolution order is env
+`$SESSION_ID` → PID file → `mktemp` suffix. The last resort suffix is
+isolated but not discoverable by the PreCompact hook without a breadcrumb file.
+
+Claude Code only sources `$CLAUDE_ENV_FILE` on `SessionStart:startup`, so the
+env var stays correct across `/compact` (the session-id does not change) but
+goes stale after `/clear` and `--resume`. The PID file fallback covers those
+cases. Run `/claude-shrink:show-session-id` to inspect all three sources.

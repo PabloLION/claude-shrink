@@ -2,7 +2,7 @@
 # Finalize shrink: copy command to clipboard, print user instructions.
 #
 # Usage: finalize.sh --clear
-#    or: finalize.sh          (reads compact instruction via breadcrumb)
+#    or: finalize.sh          (reads compact instruction from session dir)
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -15,12 +15,19 @@ After clear, SessionStart hook reads session-context.md (topic list only),
 then deletes it.
 MSG
 else
-    # Find instruction file via breadcrumb
-    BREADCRUMB=".claude/tmp/context-path.txt"
-    if [ -f "$BREADCRUMB" ]; then
-        SESSION_DIR="$(dirname "$(cat "$BREADCRUMB")")"
+    BASE="${CLAUDE_CODE_TMPDIR:-/tmp}"
+    if [ -z "${SESSION_ID:-}" ]; then
+        SESSION_ID="$("$SCRIPT_DIR/find-session-id.sh")"
+    fi
+    if [ -n "${SESSION_ID:-}" ]; then
+        SESSION_DIR="$BASE/shrink-$SESSION_ID"
     else
-        SESSION_DIR="${CLAUDE_CODE_TMPDIR:-/tmp}"
+        BREADCRUMB=".claude/tmp/context-path.txt"
+        if [ -f "$BREADCRUMB" ]; then
+            SESSION_DIR="$(dirname "$(cat "$BREADCRUMB")")"
+        else
+            SESSION_DIR="$BASE"
+        fi
     fi
     INSTRUCTION_FILE="$SESSION_DIR/compact-instruction.txt"
     COMPACT_CMD="/compact $(cat "$INSTRUCTION_FILE")"
